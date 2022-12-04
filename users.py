@@ -17,6 +17,12 @@ def load_faq():
     return data
 
 
+def load_terms():
+    data = pd.read_excel('./terms/terms.xlsx', header= None).rename(columns={0 : 'q', 1 : 'a', 2 : 'file'})
+    return data
+
+
+
 def load_stats():
     data = pd.read_excel('./stats/stats.xlsx', header= None).rename(columns={0 : 'category', 1 : 'dope', 2: 'nope'})
 
@@ -35,6 +41,7 @@ def main_kb():
     for element in data:
         keyboard.add(InlineKeyboardButton(text=str(element), callback_data=str(f'{data.index(element)}')))
     keyboard.add(InlineKeyboardButton(text='Часто задаваемые вопросы', callback_data='faq'))
+    keyboard.row(InlineKeyboardButton(text='Поиск...🔎', callback_data='search'), InlineKeyboardButton(text='Термины', callback_data='terms'))
     # keyboard.add(InlineKeyboardButton(text="Назад", callback_data="exit"))
     return keyboard
 
@@ -79,7 +86,7 @@ def faq_kb(categoryId):
     keyboard = InlineKeyboardMarkup()
 
     for el in range(data.shape[0]):
-        keyboard.add(InlineKeyboardButton(text=str(data.loc[el]['q']), callback_data=str(f'{categoryId}{el}')))
+        keyboard.add(InlineKeyboardButton(text=str(data.loc[el]['q']), callback_data=str(f'{categoryId}_{el}')))
 
     keyboard.add(InlineKeyboardButton(text="Назад", callback_data="exit"))
     return keyboard
@@ -90,7 +97,10 @@ def faq_ans_kb(categoryAndQId):
 
     keyboard = InlineKeyboardMarkup()
 
-    ans = data.loc[int(categoryAndQId[3])]['a']
+    if len(categoryAndQId.split('_')) < 2:
+        ans = data.loc[int(categoryAndQId[3])]['a']
+    else:
+        ans = data.loc[int(categoryAndQId.split('_')[1])]['a']
     keyboard.add(InlineKeyboardButton(text="Назад", callback_data="exit"))
 
     return ans, keyboard
@@ -125,3 +135,20 @@ def infoSearch(msg):
             ans.append([data.loc[el]['category'], data.loc[el]['q']])
 
     return ans
+
+
+def terms_kb(msg):
+
+    if len(msg.split('_')) == 1:
+        data = load_terms()
+        keyboard = InlineKeyboardMarkup()
+        for el in range(data.shape[0]):
+                keyboard.add(InlineKeyboardButton(text=str(data.loc[el]['q']), callback_data=str(f'{msg.split("_")[0]}_{el}')))
+        keyboard.add(InlineKeyboardButton(text="Назад", callback_data="exit"))
+        return keyboard
+    else:
+        data = load_terms()
+        keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(text="Назад", callback_data="exit"))
+        aData = data.loc[int(msg.split('_')[1])]['a']
+        fData = data.loc[int(msg.split('_')[1])]['file']
+        return aData, fData, keyboard

@@ -17,6 +17,8 @@ dp = Dispatcher(bot)
 admin = False
 user = ul()
 
+search = False
+
 @dp.message_handler(commands=['access'])
 async def startAns(message: types.Message):
 
@@ -76,21 +78,31 @@ async def spamAns(message: types.Message):
 
 @dp.message_handler(content_types=['text'])
 async def searchAns(message: types.Message):
-    if len(infoSearch(message.text)) == 0:
-        await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено')
+
+    global search
+
+    if search:
+        if len(infoSearch(message.text)) == 0:
+            await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено')
+        else:
+            data = infoSearch(message.text)
+            msg = f'Текст "{message.text}" встречается в следующих направлениях:\n\n'
+            for el in data:
+                line = f'{el[0]} ▶▶▶ {el[1]}\n\n'
+                msg += line
+            await bot.delete_message(message.chat.id, message.message_id - 1)
+            await bot.send_message(message.chat.id, msg)
+            await bot.send_message(message.chat.id, f'Результат поиска находится выше!\n\nВыберите интересующую вас категорию', reply_markup=main_kb())
+            search = False
     else:
-        data = infoSearch(message.text)
-        msg = f'Текст "{message.text}" встречается в следующих направлениях:\n\n'
-        for el in data:
-            line = f'{el[0]} ▶▶▶ {el[1]}\n\n'
-            msg += line
-        await bot.send_message(message.chat.id, msg)
+        await bot.send_message(message.chat.id, 'Сначала выберите поиск 🔎 в меню навигации')
 
 
 @dp.callback_query_handler()
 async def btnAns(callback: types.CallbackQuery):
 
     global admin
+    global search
 
     if len(callback.data) == 1:
         # Выбрана категория
@@ -108,7 +120,7 @@ async def btnAns(callback: types.CallbackQuery):
     elif callback.data[:3] == 'faq':
         if len(callback.data) == 3:
             await callback.message.edit_text(f'Выберите интересующий вас вопрос', reply_markup=faq_kb(callback.data))
-        elif len(callback.data) == 4:
+        else:
             ans, kb = faq_ans_kb(callback.data)
             await callback.message.edit_text(f'{ans}', reply_markup=kb)
 
@@ -116,7 +128,24 @@ async def btnAns(callback: types.CallbackQuery):
         addStats(callback.data)
         await callback.message.edit_text(f'Ваша оценка отправлена!\n\nВыберите интересующую вас категорию', reply_markup=main_kb())
 
+    elif callback.data[:6] == 'search':
+            search = True
+            await callback.message.edit_text(f'Отправьте сообщение с данными для поиска\n\n', reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton(text="Назад", callback_data="exit")))
+    
+    elif callback.data[:5] == 'terms':
+        if len(callback.data.split('_')) == 1:
+            await callback.message.edit_text(f'Выберите интересующий вас термин\n\n', reply_markup=terms_kb(callback.data))
+        else:
+            aData, fData, kb = terms_kb(callback.data)
+            try:
+                await bot.send_document(callback.message.chat.id, open(f'files/{fData}', 'rb'))
+                await callback.message.delete()
+                await bot.send_message(callback.message.chat.id, f'{aData}', reply_markup=kb)
+            except Exception as ex:
+                await callback.message.edit_text(f'{aData}', reply_markup=kb)
+            
     elif callback.data == 'exit':
+        search = False
         await callback.message.edit_text(f'Выберите интересующую вас категорию', reply_markup=main_kb())
 
 
