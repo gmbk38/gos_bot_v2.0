@@ -108,8 +108,8 @@ async def btnAns(callback: types.CallbackQuery):
         # Выбрана категория
         await callback.message.edit_text(f'Выберите интересующий вас вопрос', reply_markup=q_kb(callback.data))
 
-    elif len(callback.data) == 2:
-        aData, fData, kb = a_kb(callback.data)
+    elif len(callback.data.split('_')[0]) == 1 and len(callback.data.split('_')) == 2:
+        aData, fData, kb = a_kb(callback.data.split('_'))
         try:
             await bot.send_document(callback.message.chat.id, open(f'files/{fData}', 'rb'))
             await callback.message.delete()

@@ -53,12 +53,13 @@ def q_kb(categoryId):
     rule = categoryData[int(categoryId)]
 
     keyboard = InlineKeyboardMarkup()
-
-    qCounter = 0
+    
+    # qCounter = 0
+    #qCounter можно убрать
     for el in range(data.shape[0]):
         if data.loc[el]['category'] == rule:
-            keyboard.add(InlineKeyboardButton(text=str(data.loc[el]['q']), callback_data=str(f'{categoryId}{qCounter}')))
-            qCounter += 1
+            keyboard.add(InlineKeyboardButton(text=str(data.loc[el]['q']), callback_data=str(f'{categoryId}_{el}'))) #qCounter
+            # qCounter += 1
 
     keyboard.row(InlineKeyboardButton(text='👍', callback_data=f'addstats_1_{categoryId}'), InlineKeyboardButton(text='👎', callback_data=f'addstats_0_{categoryId}'))
     keyboard.add(InlineKeyboardButton(text="Назад", callback_data="exit"))
@@ -73,6 +74,9 @@ def a_kb(categoryAndQId):
 
     aData = data.loc[int(categoryAndQId[1])]['a']
     fData = data.loc[int(categoryAndQId[1])]['file']
+
+    # aData = out.loc[int(categoryAndQId[1])]['a'].where(out.loc[int(categoryAndQId[1])]['category'] == rule).dropna()
+    # fData = out.loc[int(categoryAndQId[1])]['file'].where(out.loc[int(categoryAndQId[1])]['category'] == rule).dropna()
 
     keyboard = InlineKeyboardMarkup()
 
