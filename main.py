@@ -106,14 +106,25 @@ async def searchAns(message: types.Message):
 
     if search:
         if len(message.text) <= 5:
-            await bot.send_message(message.chat.id, 'Запрос слишком короткий')
+            await bot.send_message(message.chat.id, 'Запрос слишком короткий (Должно быть не менее 5 символов)', reply_markup=main_kb())
+            try:
+                await bot.delete_message(message.chat.id, message.message_id - 1)
+            except Exception as ex:
+                pass
         else:
             counter, kb = infoSearch2(message.text)
-            if counter == 0:
-                await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено')
+            if not counter:
+                await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено', reply_markup=main_kb())
+                try:
+                    await bot.delete_message(message.chat.id, message.message_id - 1)
+                except Exception as ex:
+                    pass
             else:
                 msg = f'Текст "{message.text}" встречается в следующих направлениях:'
-                await bot.delete_message(message.chat.id, message.message_id - 1)
+                try:
+                    await bot.delete_message(message.chat.id, message.message_id - 1)
+                except Exception as ex:
+                    pass
                 await bot.send_message(message.chat.id, msg, reply_markup=kb)
             search = False
     else:
