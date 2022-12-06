@@ -141,6 +141,18 @@ def infoSearch(msg):
     return ans
 
 
+def infoSearch2(msg):
+    data = load_terms()
+    keyboard = InlineKeyboardMarkup()
+    qCounter = 0
+    for el in range(data.shape[0]):
+            if msg in data.loc[el]['a']:
+                keyboard.add(InlineKeyboardButton(text=str(data.loc[el]['q']), callback_data=str(f'terms_{el}')))
+                qCounter += 1
+    keyboard.add(InlineKeyboardButton(text="Назад", callback_data="exit"))
+    return qCounter, keyboard
+
+
 def terms_kb(msg):
 
     if len(msg.split('_')) == 1:

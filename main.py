@@ -76,23 +76,45 @@ async def spamAns(message: types.Message):
         await message.answer(f'Рассылка отправлена')  
 
 
+# @dp.message_handler(content_types=['text'])
+# async def searchAns(message: types.Message):
+
+#     global search
+
+#     if search:
+#         if len(infoSearch(message.text)) == 0:
+#             await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено')
+#         else:
+#             data = infoSearch(message.text)
+#             msg = f'Текст "{message.text}" встречается в следующих направлениях:\n\n'
+#             for el in data:
+#                 line = f'{el[0]} ▶▶▶ {el[1]}\n\n'
+#                 msg += line
+#             await bot.delete_message(message.chat.id, message.message_id - 1)
+#             await bot.send_message(message.chat.id, msg)
+#             await bot.send_message(message.chat.id, f'Результат поиска находится выше!\n\nВыберите интересующую вас категорию', reply_markup=main_kb())
+#             search = False
+#     else:
+#         await bot.send_message(message.chat.id, 'Сначала выберите поиск 🔎 в меню навигации')
+
+
+
 @dp.message_handler(content_types=['text'])
 async def searchAns(message: types.Message):
 
     global search
 
     if search:
-        if len(infoSearch(message.text)) == 0:
-            await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено')
+        if len(message.text) <= 5:
+            await bot.send_message(message.chat.id, 'Запрос слишком короткий')
         else:
-            data = infoSearch(message.text)
-            msg = f'Текст "{message.text}" встречается в следующих направлениях:\n\n'
-            for el in data:
-                line = f'{el[0]} ▶▶▶ {el[1]}\n\n'
-                msg += line
-            await bot.delete_message(message.chat.id, message.message_id - 1)
-            await bot.send_message(message.chat.id, msg)
-            await bot.send_message(message.chat.id, f'Результат поиска находится выше!\n\nВыберите интересующую вас категорию', reply_markup=main_kb())
+            counter, kb = infoSearch2(message.text)
+            if counter == 0:
+                await bot.send_message(message.chat.id, 'По данному запросу ничего не найдено')
+            else:
+                msg = f'Текст "{message.text}" встречается в следующих направлениях:'
+                await bot.delete_message(message.chat.id, message.message_id - 1)
+                await bot.send_message(message.chat.id, msg, reply_markup=kb)
             search = False
     else:
         await bot.send_message(message.chat.id, 'Сначала выберите поиск 🔎 в меню навигации')
