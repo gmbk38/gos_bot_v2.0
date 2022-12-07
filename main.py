@@ -105,8 +105,8 @@ async def searchAns(message: types.Message):
     global search
 
     if search:
-        if len(message.text) <= 5:
-            await bot.send_message(message.chat.id, 'Запрос слишком короткий (Должно быть не менее 5 символов)', reply_markup=main_kb())
+        if len(message.text) < 3:
+            await bot.send_message(message.chat.id, 'Запрос слишком короткий (Должно быть не менее 3 символов)', reply_markup=main_kb())
             try:
                 await bot.delete_message(message.chat.id, message.message_id - 1)
             except Exception as ex:
