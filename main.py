@@ -139,6 +139,7 @@ async def btnAns(callback: types.CallbackQuery):
 
     if len(callback.data) == 1:
         # Выбрана категория
+        # await callback.answer("Отзыв согласования переустройства, перепланировки помещения в многоквартирном доме", show_alert=True)
         await callback.message.edit_text(f'Выберите интересующий вас вопрос', reply_markup=q_kb(callback.data))
 
     elif len(callback.data.split('_')[0]) == 1 and len(callback.data.split('_')) == 2:
@@ -156,6 +157,8 @@ async def btnAns(callback: types.CallbackQuery):
         else:
             ans, kb = faq_ans_kb(callback.data)
             await callback.message.edit_text(f'{ans}', reply_markup=kb)
+
+            await callback.answer(faq_alert(callback.data), show_alert=True)
 
     elif callback.data.split('_')[0] == 'addstats':
         addStats(callback.data)

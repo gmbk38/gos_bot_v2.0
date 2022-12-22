@@ -110,6 +110,17 @@ def faq_ans_kb(categoryAndQId):
     return ans, keyboard
 
 
+def faq_alert(categoryAndQId):
+    data = load_faq()
+
+    if len(categoryAndQId.split('_')) < 2:
+        ans = data.loc[int(categoryAndQId[3])]['q']
+    else:
+        ans = data.loc[int(categoryAndQId.split('_')[1])]['q']
+
+    return ans
+
+
 def addStats(mark):
     data = load_4serv()
     categoryData = pd.unique(data['category']).tolist()
